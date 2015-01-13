@@ -16,7 +16,7 @@ SUCCESS = 0
 IMAGE_NOT_EXIST = 1
 UPYUN_ERROR = 2
 
-class TestUpyunAPI(unittest.TestCase):
+class TestUpyunFileAPI(unittest.TestCase):
 
     def setUp(self):
         self.root = "/test-%s/" % uuid.uuid4().hex
@@ -43,3 +43,7 @@ class TestUpyunAPI(unittest.TestCase):
     def test_non_exist(self):
         result = upyun_api.upload_image('test1.png', self.root)
         self.assertEqual(result, IMAGE_NOT_EXIST)
+
+
+class TestUpyunFolderAPI(unittest.TestCase):
+    pass

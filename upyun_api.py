@@ -43,3 +43,11 @@ def upload_image(filepath, dir_on_upyun):
         else:
             logging.info("upload success: %s to %s" % (filepath, dir_on_upyun))
             return SUCCESS
+
+def sync_folder(local_folder, upyun_folder):
+    """
+    :param local_folder: 要同步的本地路径, 绝对路径
+    :param upyun_folder: 又拍云的存储路径, 绝对路径
+    :return:
+    """
+    pass
