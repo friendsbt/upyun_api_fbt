@@ -1,3 +1,5 @@
+# coding: utf-8
+
 import os
 import logging
 import upyun
@@ -26,7 +28,7 @@ def upload_image(filepath, dir_on_upyun):
     with open(filepath, 'rb') as f:
         filename = os.path.basename(filepath)
         try:
-            res = up.put(os.path.join(dir_on_upyun, filename), f)
+            up.put(os.path.join(dir_on_upyun, filename), f, checksum=True)
         except upyun.UpYunServiceException as se:
             error_msg = "upload failed, Except an UpYunServiceException ..."+ \
                         "HTTP Status Code: " + str(se.status) + '\n' + \
@@ -40,4 +42,4 @@ def upload_image(filepath, dir_on_upyun):
             return UPYUN_ERROR
         else:
             logging.info("upload success: %s to %s" % (filepath, dir_on_upyun))
-            return 0
+            return SUCCESS
