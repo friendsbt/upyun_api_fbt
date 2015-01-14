@@ -37,11 +37,11 @@ class TestUpyunFileAPI(unittest.TestCase):
         self.assertEqual(se.exception.status, 404)
 
     def test_put_file(self):
-        result = upyun_api.upload_image('test.png', self.root)
+        result = upyun_api.upload_image('tests/test.png', self.root + 'test.png')
         self.assertEqual(result, SUCCESS)
 
     def test_non_exist(self):
-        result = upyun_api.upload_image('test1.png', self.root)
+        result = upyun_api.upload_image('test1.png', self.root + 'test.png')
         self.assertEqual(result, IMAGE_NOT_EXIST)
 
 

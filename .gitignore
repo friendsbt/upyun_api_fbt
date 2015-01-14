@@ -58,4 +58,4 @@ target/
 init.sh
 config.py
 .idea
-
+.ropeproject
