@@ -1,9 +1,12 @@
 # coding: utf-8
 
 import os
+import shutil
 import sys
 import uuid
 import unittest
+from concurrent.futures import ThreadPoolExecutor
+import concurrent.futures
 import upyun
 
 import upyun_api
@@ -21,7 +24,7 @@ class TestUpyunFileAPI(unittest.TestCase):
     def setUp(self):
         self.root = "/test-%s/" % uuid.uuid4().hex
         self.up = upyun.UpYun(BUCKETNAME, USERNAME, PASSWORD, timeout=100,
-                              endpoint=upyun.ED_TELECOM, human=False)
+                              endpoint=upyun.ED_AUTO, human=False)
 
     def tearDown(self):
         try:
@@ -46,4 +49,33 @@ class TestUpyunFileAPI(unittest.TestCase):
 
 
 class TestUpyunFolderAPI(unittest.TestCase):
-    pass
+
+    def setUp(self):
+        self.local_test_folder = 'test_folder'
+        self.local_test_folder2 = 'test_folder2'
+        self.upyun_test_folder = "/test_folder/"
+        self.up = upyun.UpYun(BUCKETNAME, USERNAME, PASSWORD, timeout=100,
+                              endpoint=upyun.ED_AUTO, human=False)
+
+    def tearDown(self):
+        if os.path.exists(os.path.join(curpath, self.local_test_folder2)):
+            shutil.rmtree(os.path.join(curpath, self.local_test_folder2))
+        pass
+
+    def test_check_sync_succeed(self):
+        result = upyun_api.check_sync_succeed(
+            os.path.join(curpath, self.local_test_folder),
+                                     self.upyun_test_folder)
+
+        self.assertEqual((True, ''), result)
+
+    def test_download_folder(self):
+        upyun_api.download_folder(
+            os.path.join(curpath, self.local_test_folder2),
+            self.upyun_test_folder, isroot=True)
+
+        result = upyun_api.check_sync_succeed(
+            os.path.join(curpath, self.local_test_folder2),
+            self.upyun_test_folder)
+
+        self.assertEqual((True, ''), result)

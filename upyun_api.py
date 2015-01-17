@@ -1,8 +1,15 @@
 # coding: utf-8
+"""
+原则: 下载函数中不会进行目录拼接, 即参数中就要给出完整的目标目录
+任何时候都不会上传/下载 以 '.' 开头的文件, 直接忽略掉
+"""
 
 import os
 import imghdr
+import shutil
 from os.path import join as join_path
+from concurrent.futures import ThreadPoolExecutor
+import concurrent.futures
 import upyun
 from config import *
 from my_logging import *
@@ -37,18 +44,97 @@ def upload_image(filepath, filepath_on_upyun):
             logging.info("upload success: %s to %s" % (filepath, filepath_on_upyun))
             return SUCCESS
 
-def download_folder(local_folder, upyun_folder):
-    """ 从 upyun 下载一个文件夹到本地
-    :param local_folder: 本地文件夹, 之前必须保证不存在, 否则下载失败
+def download_folder(local_folder, upyun_folder, file_to_download=None, executor=None, isroot=False):
+    """ 从 upyun 下载一个文件夹到本地, 例如/upyun/images/icon -> /local/images/icon
+    :param local_folder: 本地文件夹, 之前应当不存在, 否则会删掉这个文件夹
     :param upyun_folder: upyun 的路径
     :return:
     """
-    pass
+    if isroot:
+        file_to_download = []
+
+    if os.path.exists(local_folder):
+        shutil.rmtree(local_folder, ignore_errors=True)
+
+    os.makedirs(local_folder)
+
+    res = up.getlist(upyun_folder)
+    upyun_subdirs = {
+        f.get('name'): f for f in res if f.get('type') == 'F'
+                                    and not f['name'].startswith('.')
+    }
+    upyun_files = {
+        f.get('name'): f for f in res if f.get('type') == 'N'
+                                    and not f['name'].startswith('.')
+    }
+    for file in upyun_files.keys():
+            file_to_download.append(
+                (join_path(local_folder, file),
+                join_path(upyun_folder, file)
+            ))
+
+    for subdir in upyun_subdirs.keys():
+        download_folder(join_path(local_folder, subdir),
+                        join_path(upyun_folder, subdir),
+                        file_to_download=file_to_download)
+
+    if isroot:
+        fds = []
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            for local_remote_tuple in file_to_download:
+                f = open(local_remote_tuple[0], 'wb')
+                fds.append(f)
+                print("submit:", str(local_remote_tuple))
+                executor.submit(up.get, local_remote_tuple[1], f)
+
+        for fd in fds:
+            fd.close()
+        print("complete")
 
 def check_sync_succeed(local_root_folder, upyun_root_folder):
-    """ 测试用, 检查文件夹同步是否成功
+    """ 测试用, 检查文件夹同步是否成功, 成功返回(True, ''), 失败返回(False, 'err msg')
     """
-    pass
+    for root, subdirs, files in os.walk(local_root_folder):
+        subdirs = [s for s in subdirs if not s.startswith('.')]
+        files = [f for f in files if not f.startswith('.')]
+
+        relpath = os.path.relpath(root, local_root_folder)
+        upyun_folder = join_path(upyun_root_folder, relpath) \
+            if relpath != '.' else upyun_root_folder
+
+        res = up.getlist(upyun_folder)
+        upyun_subdirs = {
+            f.get('name'): f for f in res if f.get('type') == 'F'
+                                        and not f['name'].startswith('.')
+        }
+        upyun_files = {
+            f.get('name'): f for f in res if f.get('type') == 'N'
+                                        and not f['name'].startswith('.')
+        }
+
+        if set(subdirs) != set(upyun_subdirs.keys()):
+            err_msg = "local has %s in %s\n" % (str(subdirs), root)
+            err_msg += "upyun has %s in %s\n" % \
+                       (str(upyun_subdirs.keys()), upyun_folder)
+            return False, err_msg
+
+        if set(files) != set(upyun_files.keys()):
+            err_msg = "local has %s in %s\n" % (str(files), root)
+            err_msg += "upyun has %s in %s\n" % \
+                       (str(upyun_files.keys()), upyun_folder)
+            return False, err_msg
+
+        for file in files:
+            local_file_size = os.path.getsize(join_path(root, file))
+            if local_file_size != int(upyun_files.get(file)['size']):
+                err_msg = "local file %s size: %d\n" % \
+                          (join_path(root, file), local_file_size)
+                err_msg += "upyun file %s size: %s\n" % \
+                           (join_path(upyun_folder, file),
+                            upyun_files.get(file)['size'])
+                return False, err_msg
+
+    return True, ''
 
 def sync_folder(local_root_folder, upyun_root_folder):
     """
@@ -67,6 +153,9 @@ def sync_folder(local_root_folder, upyun_root_folder):
     folder_to_download = []
 
     for root, subdirs, files in os.walk(local_root_folder):
+        subdirs = [s for s in subdirs if not s.startswith('.')]
+        files = [f for f in files if not f.startswith('.')]
+
         relpath = os.path.relpath(root, local_root_folder)
         upyun_folder = join_path(upyun_root_folder, relpath)
         try:
@@ -83,11 +172,13 @@ def sync_folder(local_root_folder, upyun_root_folder):
             log_ce(ce)
         else:
             # 云端有这个目录
-            upyun_sudirs = {
-                f.get(name): f for f in res if f.get('type') == 'F'
+            upyun_subdirs = {
+                f.get('name'): f for f in res if f.get('type') == 'F'
+                                            and not f['name'].startswith('.')
             }
             upyun_files = {
-                f.get(name): f for f in res if f.get('type') == 'N'
+                f.get('name'): f for f in res if f.get('type') == 'N'
+                                            and not f['name'].startswith('.')
             }
 
             # upyun has, local don't
@@ -105,7 +196,7 @@ def sync_folder(local_root_folder, upyun_root_folder):
             # compare files
             for f in set(files).intersection(upyun_files.keys()):
                 local_file = join_path(root, f)
-                if upyun_files[f]['size'] != os.path.getsize(local_file):
+                if int(upyun_files[f]['size']) != os.path.getsize(local_file):
                     local_remote_tuple = (local_file, join_path(upyun_folder, f))
                     if os.path.getatime(local_file) > upyun_files[f]['time']:
                         file_to_upload.append(local_remote_tuple)
