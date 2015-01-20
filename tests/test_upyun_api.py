@@ -37,10 +37,17 @@ class TestUpyunFileAPI(unittest.TestCase):
         with self.assertRaises(upyun.UpYunServiceException) as se:
             self.up.getinfo(self.root)
         self.assertEqual(se.exception.status, 404)
+        try:
+            os.remove('test.png')
+        except OSError:
+            pass
 
-    def test_put_file(self):
+    def test_get_and_put_file(self):
         result = upyun_api.upload_image('tests/test.png', self.root + 'test.png')
         self.assertEqual(result, SUCCESS)
+        result = upyun_api.download_image('test.png', self.root + 'test.png')
+        self.assertEqual(result, SUCCESS)
+        self.assertEqual(os.path.getsize('test.png'), 13001)
 
     def test_non_exist(self):
         result = upyun_api.upload_image('test1.png', self.root + 'test.png')

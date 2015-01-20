@@ -2,6 +2,8 @@
 """
 原则: 下载函数中不会进行目录拼接, 即参数中就要给出完整的目标目录
 任何时候都不会上传/下载 以 '.' 开头的文件, 直接忽略掉
+
+download_image 和 upload_image 方法只在一次性传输一张图片时使用
 """
 
 import os
@@ -25,9 +27,10 @@ up = upyun.UpYun(BUCKETNAME, USERNAME, PASSWORD, timeout=30,
 def upload_image(filepath, filepath_on_upyun):
     """
     :param filepath: 图片的绝对路径
-    :param dir_on_upyun: 在upyun 上的存储路径, 例如/static/images/user_icon
+    :param dir_on_upyun: 在upyun 上的存储路径, 例如/static/images/user_icon/a.jpg
     :return: return code
     """
+    filepath = os.path.realpath(filepath)
     if not os.path.exists(filepath):
         return NOT_EXIST
 
@@ -44,7 +47,32 @@ def upload_image(filepath, filepath_on_upyun):
             log_ce(ce)
             return UPYUN_ERROR
         else:
-            logging.info("upload success: %s to %s" % (filepath, filepath_on_upyun))
+            logging.info("upload success: %s to %s" %
+                         (filepath, filepath_on_upyun))
+            return SUCCESS
+
+def download_image(filepath, filepath_on_upyun):
+    """
+    :param filepath: 图片的绝对路径
+    :param dir_on_upyun: 在upyun 上的存储路径, 例如/static/images/user_icon/a.jpg
+    :return: return code
+    """
+    filepath = os.path.realpath(filepath)
+    if not os.path.exists(os.path.dirname(filepath)):
+        os.makedirs(os.path.dirname(filepath))
+
+    with open(filepath, 'wb') as f:
+        try:
+            up.get(filepath_on_upyun, f)
+        except upyun.UpYunServiceException as se:
+            log_se(se)
+            return UPYUN_ERROR
+        except upyun.UpYunClientException as ce:
+            log_ce(ce)
+            return UPYUN_ERROR
+        else:
+            logging.info("download success: %s to %s" %
+                         (filepath_on_upyun, filepath))
             return SUCCESS
 
 def download_folder(local_folder, upyun_folder, file_to_download=None, executor=None, isroot=False):
