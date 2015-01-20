@@ -76,7 +76,7 @@ def download_image(filepath, filepath_on_upyun):
             return SUCCESS
 
 def download_folder(local_folder, upyun_folder, file_to_download=None,
-                    executor=None, isroot=False):
+                    isroot=False):
     """ 从 upyun 下载一个文件夹到本地, 例如/upyun/images/icon -> /local/images/icon
     :param local_folder: 本地文件夹, 之前应当不存在, 否则会删掉这个文件夹
     :param upyun_folder: upyun 的路径
@@ -123,7 +123,9 @@ def check_sync_succeed(local_root_folder, upyun_root_folder):
     """ 测试用, 检查文件夹同步是否成功, 成功返回(True, ''), 失败返回(False, 'err msg')
     """
     for root, subdirs, files in os.walk(local_root_folder):
-        subdirs = [s for s in subdirs if not s.startswith('.')]
+        if os.path.basename(root).startswith('.'):
+            continue
+        subdirs[:] = [d for d in subdirs if d[0] != '.']
         files = [f for f in files if not f.startswith('.')]
 
         relpath = os.path.relpath(root, local_root_folder)
@@ -172,6 +174,7 @@ def sync_folder(local_root_folder, upyun_root_folder):
     取较新的覆盖到另一边
     :return:
     """
+    local_root_folder = os.path.realpath(local_root_folder)
     if not os.path.exists(local_root_folder):
         return NOT_EXIST
 
@@ -181,7 +184,9 @@ def sync_folder(local_root_folder, upyun_root_folder):
     folder_to_download = []
 
     for root, subdirs, files in os.walk(local_root_folder):
-        subdirs = [s for s in subdirs if not s.startswith('.')]
+        if os.path.basename(root).startswith('.'):
+            continue
+        subdirs[:] = [d for d in subdirs if d[0] != '.']
         files = [f for f in files if not f.startswith('.')]
 
         relpath = os.path.relpath(root, local_root_folder)
@@ -190,7 +195,7 @@ def sync_folder(local_root_folder, upyun_root_folder):
             res = up.getlist(upyun_folder)
         except upyun.UpYunServiceException as se:
             # 云端没有这个目录
-            if (se.exception.status == 404):
+            if (se.status == 404):
                 for file in files:
                     file_to_upload.append((join_path(root, file),
                                            join_path(upyun_folder, file)))
@@ -239,8 +244,6 @@ def sync_folder(local_root_folder, upyun_root_folder):
                         join_path(upyun_folder, upyun_subdir))
                     )
 
-    # 统一处理所有上传下载
-    # TODO:
     with MultiUpThreadPoolExecutor(max_workers=4) as executor:
         for local_remote_tuple in file_to_download:
             fd = open(local_remote_tuple[0], 'wb')
@@ -250,3 +253,6 @@ def sync_folder(local_root_folder, upyun_root_folder):
         for local_remote_tuple in file_to_download:
             fd = open(local_remote_tuple[0], 'wb')
             executor.submit(local_remote_tuple[1], fd)
+
+    for t in folder_to_download:
+        download_folder(*t, isroot=True)

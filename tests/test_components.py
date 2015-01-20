@@ -95,6 +95,7 @@ class TestUpyunFolderAPI(unittest.TestCase):
         self.assertEqual((True, ''), result)
 
 
+
 class TestExecutor(unittest.TestCase):
     def setUp(self):
         self.upyun_test_folder = "/test_folder2/"
