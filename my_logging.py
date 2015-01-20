@@ -12,7 +12,7 @@ logging.basicConfig(filename=LOG_FILENAME,
 def log_se(se):
     if not isinstance(se, upyun.UpYunServiceException):
         logging.error("logging error: ", str(se))
-        return
+        raise se
 
     error_msg = "upload failed, Except an UpYunServiceException ..."+ \
                 "HTTP Status Code: " + str(se.status) + '\n' + \
@@ -22,7 +22,7 @@ def log_se(se):
 def log_ce(ce):
     if not isinstance(ce, upyun.UpYunClientException):
         logging.error("logging error: ", str(ce))
-        return
+        raise ce
 
     error_msg = "upload failed Except an UpYunClientException ..." + \
                 "Error Message: " + ce.msg + "\n"

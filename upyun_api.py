@@ -75,7 +75,8 @@ def download_image(filepath, filepath_on_upyun):
                          (filepath_on_upyun, filepath))
             return SUCCESS
 
-def download_folder(local_folder, upyun_folder, file_to_download=None, executor=None, isroot=False):
+def download_folder(local_folder, upyun_folder, file_to_download=None,
+                    executor=None, isroot=False):
     """ 从 upyun 下载一个文件夹到本地, 例如/upyun/images/icon -> /local/images/icon
     :param local_folder: 本地文件夹, 之前应当不存在, 否则会删掉这个文件夹
     :param upyun_folder: upyun 的路径
@@ -114,11 +115,10 @@ def download_folder(local_folder, upyun_folder, file_to_download=None, executor=
             for local_remote_tuple in file_to_download:
                 fd = open(local_remote_tuple[0], 'wb')
                 print("submit:", str(local_remote_tuple))
-                f = executor.submit(local_remote_tuple[1], fd)
-                f.fd = fd
-                f.add_done_callback(lambda x: x.fd.close())
+                executor.submit(local_remote_tuple[1], fd)
 
-        print("complete")
+        logging.info("download folder success: %s to %s" %
+                     (upyun_folder, local_folder))
 
 def check_sync_succeed(local_root_folder, upyun_root_folder):
     """ 测试用, 检查文件夹同步是否成功, 成功返回(True, ''), 失败返回(False, 'err msg')
@@ -169,8 +169,8 @@ def sync_folder(local_root_folder, upyun_root_folder):
     """
     :param local_root_folder: 要同步的本地路径, 绝对路径
     :param upyun_root_folder: 又拍云的存储路径, 绝对路径
-    这个函数的执行策略是如果有一个文件在一边没有, 那么就放到另一边, 如果都有且size 不同, 取
-    较新的覆盖到另一边
+    这个函数的执行策略是如果有一个文件在一边没有, 那么就放到另一边, 如果都有且size 不同,
+    取较新的覆盖到另一边
     :return:
     """
     if not os.path.exists(local_root_folder):
