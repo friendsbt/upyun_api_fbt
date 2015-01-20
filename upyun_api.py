@@ -8,15 +8,15 @@ import os
 import imghdr
 import shutil
 from os.path import join as join_path
-from concurrent.futures import ThreadPoolExecutor
-import concurrent.futures
 import upyun
+from MultiUpThreadPoolExecutor import MultiUpThreadPoolExecutor
 from config import *
 from my_logging import *
 
 SUCCESS = 0
 NOT_EXIST = 1
-UPYUN_ERROR = 2
+NOT_IMAGE = 2
+UPYUN_ERROR = 3
 
 
 up = upyun.UpYun(BUCKETNAME, USERNAME, PASSWORD, timeout=30,
@@ -30,6 +30,9 @@ def upload_image(filepath, filepath_on_upyun):
     """
     if not os.path.exists(filepath):
         return NOT_EXIST
+
+    if imghdr.what(filepath) is None:
+        return NOT_IMAGE
 
     with open(filepath, 'rb') as f:
         try:
@@ -79,16 +82,14 @@ def download_folder(local_folder, upyun_folder, file_to_download=None, executor=
                         file_to_download=file_to_download)
 
     if isroot:
-        fds = []
-        with ThreadPoolExecutor(max_workers=4) as executor:
+        with MultiUpThreadPoolExecutor(max_workers=4) as executor:
             for local_remote_tuple in file_to_download:
-                f = open(local_remote_tuple[0], 'wb')
-                fds.append(f)
+                fd = open(local_remote_tuple[0], 'wb')
                 print("submit:", str(local_remote_tuple))
-                executor.submit(up.get, local_remote_tuple[1], f)
+                f = executor.submit(local_remote_tuple[1], fd)
+                f.fd = fd
+                f.add_done_callback(lambda x: x.fd.close())
 
-        for fd in fds:
-            fd.close()
         print("complete")
 
 def check_sync_succeed(local_root_folder, upyun_root_folder):

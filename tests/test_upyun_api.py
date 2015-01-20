@@ -15,7 +15,8 @@ sys.path.insert(0, curpath)
 
 SUCCESS = 0
 IMAGE_NOT_EXIST = 1
-UPYUN_ERROR = 2
+NOT_IMAGE = 2
+UPYUN_ERROR = 3
 
 class TestUpyunFileAPI(unittest.TestCase):
 
@@ -44,6 +45,13 @@ class TestUpyunFileAPI(unittest.TestCase):
     def test_non_exist(self):
         result = upyun_api.upload_image('test1.png', self.root + 'test.png')
         self.assertEqual(result, IMAGE_NOT_EXIST)
+
+    def test_not_image(self):
+        result = upyun_api.upload_image('.gitignore', self.root + '.gitignore')
+        self.assertEqual(result, NOT_IMAGE)
+
+        result = upyun_api.upload_image('config.py', self.root + 'config.py')
+        self.assertEqual(result, NOT_IMAGE)
 
 
 class TestUpyunFolderAPI(unittest.TestCase):
