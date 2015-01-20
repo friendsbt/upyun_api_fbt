@@ -59,3 +59,4 @@ init.sh
 config.py
 .idea
 .ropeproject
+logs

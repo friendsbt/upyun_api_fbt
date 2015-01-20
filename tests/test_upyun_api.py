@@ -5,8 +5,6 @@ import shutil
 import sys
 import uuid
 import unittest
-from concurrent.futures import ThreadPoolExecutor
-import concurrent.futures
 import upyun
 
 import upyun_api

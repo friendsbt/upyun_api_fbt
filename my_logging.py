@@ -1,5 +1,9 @@
 import upyun
 import logging
+import os
+
+if not os.path.exists("logs"):
+    os.mkdir("logs")
 
 LOG_FILENAME = 'logs/upyun-api.log'
 logging.basicConfig(filename=LOG_FILENAME,
