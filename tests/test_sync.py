@@ -21,6 +21,6 @@ UPYUN_ERROR = 3
 
 class TestSyncFolder(unittest.TestCase):
     def test_sync_folder(self):
-        upyun_api.sync_folder('.', '/sync/')
-        result = upyun_api.check_sync_succeed('.', '/sync/')
+        upyun_api.sync_folder('test_folder', '/sync/')
+        result = upyun_api.check_sync_succeed('test_folder', '/sync/')
         self.assertEqual((True, ''), result)

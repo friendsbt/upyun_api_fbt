@@ -121,7 +121,7 @@ class TestExecutor(unittest.TestCase):
         shutil.rmtree(self.temp_folder)
 
 
-    def test_async_upload(self):
+    def test_async_upload_and_download(self):
         # test upload
         fd1 = open('test_folder/test.png', 'rb')
         fd2 = open('test_folder/test2.png', 'rb')

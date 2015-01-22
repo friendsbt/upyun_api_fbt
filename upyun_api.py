@@ -14,6 +14,7 @@ import upyun
 from MultiUpThreadPoolExecutor import MultiUpThreadPoolExecutor
 from config import *
 from my_logging import *
+from utils import normalize
 
 SUCCESS = 0
 NOT_EXIST = 1
@@ -197,8 +198,10 @@ def sync_folder(local_root_folder, upyun_root_folder):
             # 云端没有这个目录
             if (se.status == 404):
                 for file in files:
-                    file_to_upload.append((join_path(root, file),
-                                           join_path(upyun_folder, file)))
+                    file_to_upload.append(
+                        (join_path(root, file),
+                        normalize(join_path(upyun_folder, file)))
+                    )
             else:
                 log_se(se)
         except upyun.UpYunClientException as ce:
@@ -216,21 +219,28 @@ def sync_folder(local_root_folder, upyun_root_folder):
 
             # upyun has, local don't
             for f in set(upyun_files.keys()) - set(files):
-                local_remote_tuple = (join_path(root, f),
-                                      join_path(upyun_folder, f))
+                local_remote_tuple = (
+                    join_path(root, f),
+                    normalize(join_path(upyun_folder, f))
+                )
                 file_to_download.append(local_remote_tuple)
 
             # local has, upyun don't
             for f in set(files) - set(upyun_files.keys()):
-                local_remote_tuple = (join_path(root, f),
-                                      join_path(upyun_folder, f))
+                local_remote_tuple = (
+                    join_path(root, f),
+                    normalize(join_path(upyun_folder, f))
+                )
                 file_to_upload.append(local_remote_tuple)
 
             # compare files
             for f in set(files).intersection(upyun_files.keys()):
                 local_file = join_path(root, f)
                 if int(upyun_files[f]['size']) != os.path.getsize(local_file):
-                    local_remote_tuple = (local_file, join_path(upyun_folder, f))
+                    local_remote_tuple = (
+                        local_file,
+                        normalize(join_path(upyun_folder, f))
+                    )
                     if os.path.getatime(local_file) > upyun_files[f]['time']:
                         file_to_upload.append(local_remote_tuple)
                     else:
@@ -241,7 +251,7 @@ def sync_folder(local_root_folder, upyun_root_folder):
                 if upyun_subdir not in subdirs:
                     folder_to_download.append(
                         (join_path(root, upyun_subdir),
-                        join_path(upyun_folder, upyun_subdir))
+                        normalize(join_path(upyun_folder, upyun_subdir)))
                     )
 
     with MultiUpThreadPoolExecutor(max_workers=4) as executor:
@@ -250,9 +260,9 @@ def sync_folder(local_root_folder, upyun_root_folder):
             executor.submit(local_remote_tuple[1], fd)
 
     with MultiUpThreadPoolExecutor(max_workers=4) as executor:
-        for local_remote_tuple in file_to_download:
-            fd = open(local_remote_tuple[0], 'wb')
-            executor.submit(local_remote_tuple[1], fd)
+        for local_remote_tuple in file_to_upload:
+            fd = open(local_remote_tuple[0], 'rb')
+            executor.submit(local_remote_tuple[1], fd, method='PUT')
 
     for t in folder_to_download:
         download_folder(*t, isroot=True)
