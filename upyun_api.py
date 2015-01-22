@@ -127,7 +127,8 @@ def check_sync_succeed(local_root_folder, upyun_root_folder):
         if os.path.basename(root).startswith('.'):
             continue
         subdirs[:] = [d for d in subdirs if d[0] != '.']
-        files = [f for f in files if not f.startswith('.')]
+        files = [f for f in files if not f.startswith('.')
+                 and imghdr.what(join_path(root, f)) is not None]
 
         relpath = os.path.relpath(root, local_root_folder)
         upyun_folder = join_path(upyun_root_folder, relpath) \
@@ -188,7 +189,8 @@ def sync_folder(local_root_folder, upyun_root_folder):
         if os.path.basename(root).startswith('.'):
             continue
         subdirs[:] = [d for d in subdirs if d[0] != '.']
-        files = [f for f in files if not f.startswith('.')]
+        files = [f for f in files if not f.startswith('.')
+                 and imghdr.what(join_path(root, f)) is not None]
 
         relpath = os.path.relpath(root, local_root_folder)
         upyun_folder = join_path(upyun_root_folder, relpath)
