@@ -20,6 +20,12 @@ class MultiUpThreadPoolExecutor(ThreadPoolExecutor):
         if self.__submit_to >= self._max_workers:
             self.__submit_to = 0
 
+    @staticmethod
+    def succeed_callback(future):
+        future.fd.close()
+        print(future.method + " " + future.filepath + " succeed")
+        logging.info(future.method + " " + future.filepath + " succeed")
+
     def submit(self, filepath_on_upyun, fd, method="GET"):
         """
         此方法兼顾上传和下载, 根据method决定
@@ -40,6 +46,8 @@ class MultiUpThreadPoolExecutor(ThreadPoolExecutor):
         f = super(MultiUpThreadPoolExecutor, self)\
                 .submit(fn, filepath_on_upyun, fd)
         f.fd = fd
-        f.add_done_callback(lambda x: x.fd.close())
+        f.method = method
+        f.filepath = filepath_on_upyun
+        f.add_done_callback(self.succeed_callback)
         self._check_submit_to()
         return f

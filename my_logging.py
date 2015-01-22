@@ -7,7 +7,7 @@ if not os.path.exists("logs"):
 
 LOG_FILENAME = 'logs/upyun-api.log'
 logging.basicConfig(filename=LOG_FILENAME,
-                    level=logging.DEBUG,)
+                    level=logging.INFO,)
 
 def log_se(se):
     if not isinstance(se, upyun.UpYunServiceException):
