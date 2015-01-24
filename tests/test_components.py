@@ -28,8 +28,6 @@ class TestUpyunFileAPI(unittest.TestCase):
 
     def setUp(self):
         self.root = "/test-%s/" % uuid.uuid4().hex
-        print("uname:", UPYUN_USERNAME)
-        print("password:", UPYUN_PASSWORD)
         self.up = upyun.UpYun(BUCKETNAME, UPYUN_USERNAME, UPYUN_PASSWORD, timeout=100,
                               endpoint=upyun.ED_AUTO, human=False)
 
