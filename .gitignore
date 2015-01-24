@@ -60,3 +60,4 @@ config.py
 .idea
 .ropeproject
 logs
+*/.DS_Store

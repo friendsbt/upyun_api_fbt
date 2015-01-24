@@ -1,8 +1,14 @@
 # coding: utf-8
 
+import os
 from concurrent.futures import ThreadPoolExecutor
 import upyun
-from config import *
+try:
+    from config import *
+except ImportError:
+    BUCKETNAME = os.environ['BUCKETNAME']
+    UPYUN_USERNAME = os.environ['UPYUN_USERNAME']
+    UPYUN_PASSWORD = os.environ['UPYUN_PASSWORD']
 from my_logging import *
 
 
@@ -10,7 +16,7 @@ class MultiUpThreadPoolExecutor(ThreadPoolExecutor):
 
     def __init__(self, max_workers):
         self._max_workers = max_workers
-        self.workers = [upyun.UpYun(BUCKETNAME, USERNAME, PASSWORD,
+        self.workers = [upyun.UpYun(BUCKETNAME, UPYUN_USERNAME, UPYUN_PASSWORD,
                         endpoint=upyun.ED_AUTO) for i in range(max_workers)]
         self.__submit_to = 0
         super(MultiUpThreadPoolExecutor, self).__init__(max_workers)

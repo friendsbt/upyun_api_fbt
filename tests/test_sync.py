@@ -8,7 +8,6 @@ import unittest
 import upyun
 
 import upyun_api
-from config import *
 from MultiUpThreadPoolExecutor import MultiUpThreadPoolExecutor
 
 curpath = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))

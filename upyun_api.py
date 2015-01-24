@@ -12,7 +12,12 @@ import shutil
 from os.path import join as join_path
 import upyun
 from MultiUpThreadPoolExecutor import MultiUpThreadPoolExecutor
-from config import *
+try:
+    from config import *
+except ImportError:
+    BUCKETNAME = os.environ['BUCKETNAME']
+    UPYUN_USERNAME = os.environ['UPYUN_USERNAME']
+    UPYUN_PASSWORD = os.environ['UPYUN_PASSWORD']
 from my_logging import *
 from utils import normalize
 
@@ -22,7 +27,7 @@ NOT_IMAGE = 2
 UPYUN_ERROR = 3
 
 
-up = upyun.UpYun(BUCKETNAME, USERNAME, PASSWORD, timeout=30,
+up = upyun.UpYun(BUCKETNAME, UPYUN_USERNAME, UPYUN_PASSWORD, timeout=30,
                  endpoint=upyun.ED_AUTO)
 
 def upload_image(filepath, filepath_on_upyun):

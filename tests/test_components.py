@@ -8,7 +8,12 @@ import unittest
 import upyun
 
 import upyun_api
-from config import *
+try:
+    from config import *
+except ImportError:
+    BUCKETNAME = os.environ['BUCKETNAME']
+    UPYUN_USERNAME = os.environ['UPYUN_USERNAME']
+    UPYUN_PASSWORD = os.environ['UPYUN_PASSWORD']
 from MultiUpThreadPoolExecutor import MultiUpThreadPoolExecutor
 
 curpath = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
@@ -23,7 +28,9 @@ class TestUpyunFileAPI(unittest.TestCase):
 
     def setUp(self):
         self.root = "/test-%s/" % uuid.uuid4().hex
-        self.up = upyun.UpYun(BUCKETNAME, USERNAME, PASSWORD, timeout=100,
+        print("uname:", UPYUN_USERNAME)
+        print("password:", UPYUN_PASSWORD)
+        self.up = upyun.UpYun(BUCKETNAME, UPYUN_USERNAME, UPYUN_PASSWORD, timeout=100,
                               endpoint=upyun.ED_AUTO, human=False)
 
     def tearDown(self):
@@ -58,7 +65,7 @@ class TestUpyunFileAPI(unittest.TestCase):
         result = upyun_api.upload_image('.gitignore', self.root + '.gitignore')
         self.assertEqual(result, NOT_IMAGE)
 
-        result = upyun_api.upload_image('config.py', self.root + 'config.py')
+        result = upyun_api.upload_image('utils.py', self.root + 'utils.py')
         self.assertEqual(result, NOT_IMAGE)
 
 
@@ -68,7 +75,7 @@ class TestUpyunFolderAPI(unittest.TestCase):
         self.local_test_folder = 'test_folder'
         self.local_test_folder2 = 'test_folder2'
         self.upyun_test_folder = "/test_folder/"
-        self.up = upyun.UpYun(BUCKETNAME, USERNAME, PASSWORD, timeout=100,
+        self.up = upyun.UpYun(BUCKETNAME, UPYUN_USERNAME, UPYUN_PASSWORD, timeout=100,
                               endpoint=upyun.ED_AUTO, human=False)
 
     def tearDown(self):
@@ -101,7 +108,7 @@ class TestExecutor(unittest.TestCase):
         self.upyun_test_folder = "/test_folder2/"
         self.temp_folder = 'temp_folder/'
         self.executor = MultiUpThreadPoolExecutor(4)
-        self.up = upyun.UpYun(BUCKETNAME, USERNAME, PASSWORD, timeout=100,
+        self.up = upyun.UpYun(BUCKETNAME, UPYUN_USERNAME, UPYUN_PASSWORD, timeout=100,
                               endpoint=upyun.ED_AUTO, human=False)
         os.mkdir(self.temp_folder)
 
