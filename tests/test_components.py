@@ -19,10 +19,10 @@ from MultiUpThreadPoolExecutor import MultiUpThreadPoolExecutor
 curpath = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.insert(0, curpath)
 
-SUCCESS = 0
-IMAGE_NOT_EXIST = 1
-NOT_IMAGE = 2
-UPYUN_ERROR = 3
+SUCCESS = "SUCCESS"
+NOT_EXIST = "NOT_EXIST"
+NOT_IMAGE = "NOT_IMAGE"
+UPYUN_ERROR = "UPYUN_ERROR"
 
 class TestUpyunFileAPI(unittest.TestCase):
 
@@ -98,7 +98,6 @@ class TestUpyunFolderAPI(unittest.TestCase):
             self.upyun_test_folder)
 
         self.assertEqual((True, ''), result)
-
 
 
 class TestExecutor(unittest.TestCase):

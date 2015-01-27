@@ -21,10 +21,10 @@ except ImportError:
 from my_logging import *
 from utils import normalize
 
-SUCCESS = 0
-NOT_EXIST = 1
-NOT_IMAGE = 2
-UPYUN_ERROR = 3
+SUCCESS = "SUCCESS"
+NOT_EXIST = "NOT_EXIST"
+NOT_IMAGE = "NOT_IMAGE"
+UPYUN_ERROR = "UPYUN_ERROR"
 
 
 up = upyun.UpYun(BUCKETNAME, UPYUN_USERNAME, UPYUN_PASSWORD, timeout=30,
