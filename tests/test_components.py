@@ -57,7 +57,7 @@ class TestUpyunFileAPI(unittest.TestCase):
 
     def test_non_exist(self):
         result = upyun_api.upload_image('test1.png', self.root + 'test.png')
-        self.assertEqual(result, IMAGE_NOT_EXIST)
+        self.assertEqual(result, NOT_EXIST)
 
     def test_not_image(self):
         result = upyun_api.upload_image('.gitignore', self.root + '.gitignore')
