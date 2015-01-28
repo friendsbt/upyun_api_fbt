@@ -28,7 +28,9 @@ class MultiUpThreadPoolExecutor(ThreadPoolExecutor):
 
     @staticmethod
     def succeed_callback(future):
+        print("closing fd")
         future.fd.close()
+        print("fd closed: ", future.fd.closed)
         print(future.method + " " + future.filepath + " succeed")
         logging.info(future.method + " " + future.filepath + " succeed")
 

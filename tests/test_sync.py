@@ -20,6 +20,12 @@ UPYUN_ERROR = "UPYUN_ERROR"
 
 class TestSyncFolder(unittest.TestCase):
     def test_sync_folder(self):
+        file_to_download, file_to_upload, folder_to_download = \
         upyun_api.sync_folder('test_folder', '/sync/')
+
+        print(file_to_upload)
+        print(file_to_upload)
+        print(folder_to_download)
+
         result = upyun_api.check_sync_succeed('test_folder', '/sync/')
         self.assertEqual((True, ''), result)
