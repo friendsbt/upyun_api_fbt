@@ -23,7 +23,7 @@ if platform.node() == 'ebs-34536':
 home = expanduser("~")
 upyun_api.sync_folder(
     join(home, 'fbt_server_py', 'static/images'), '/static/images',
-    lastsynctime=lastsynctime
+    lastsynctime=int(lastsynctime)
 )
 # upyun_api.sync_folder('C:\\Users\\dell\\Desktop\\images\\res_icon', '/static/images/res_icon')
 # upyun_api.sync_folder(
