@@ -172,7 +172,7 @@ def check_sync_succeed(local_root_folder, upyun_root_folder):
 
     return True, ''
 
-def sync_folder(local_root_folder, upyun_root_folder):
+def sync_folder(local_root_folder, upyun_root_folder, lastsynctime=None):
     """
     :param local_root_folder: 要同步的本地路径, 绝对路径
     :param upyun_root_folder: 又拍云的存储路径, 绝对路径
@@ -259,6 +259,14 @@ def sync_folder(local_root_folder, upyun_root_folder):
                         (join_path(root, upyun_subdir),
                         normalize(join_path(upyun_folder, upyun_subdir)))
                     )
+
+    # filter out images that have been synced, remove this in the future
+    if lastsynctime:
+        file_to_upload = [
+            t for t in file_to_upload if
+            os.path.getctime(t[0]) > lastsynctime
+        ]
+        print("file_to_upload:", file_to_upload)
 
     with MultiUpThreadPoolExecutor(max_workers=8) as executor:
         for local_remote_tuple in file_to_download:
