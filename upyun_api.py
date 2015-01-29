@@ -119,8 +119,7 @@ def download_folder(local_folder, upyun_folder, file_to_download=None,
     if isroot:
         with MultiUpThreadPoolExecutor(max_workers=4) as executor:
             for local_remote_tuple in file_to_download:
-                fd = open(local_remote_tuple[0], 'wb')
-                executor.submit(local_remote_tuple[1], fd)
+                executor.submit(*local_remote_tuple)
 
         logging.info("download folder success: %s to %s" %
                      (upyun_folder, local_folder))
@@ -263,14 +262,11 @@ def sync_folder(local_root_folder, upyun_root_folder):
 
     with MultiUpThreadPoolExecutor(max_workers=8) as executor:
         for local_remote_tuple in file_to_download:
-            # TODO: too many open files
-            fd = open(local_remote_tuple[0], 'wb')
-            executor.submit(local_remote_tuple[1], fd)
+            executor.submit(*local_remote_tuple)
 
     with MultiUpThreadPoolExecutor(max_workers=8) as executor:
         for local_remote_tuple in file_to_upload:
-            fd = open(local_remote_tuple[0], 'rb')
-            executor.submit(local_remote_tuple[1], fd, method='PUT')
+            executor.submit(*local_remote_tuple, method='PUT')
 
     for t in folder_to_download:
         download_folder(*t, isroot=True)
