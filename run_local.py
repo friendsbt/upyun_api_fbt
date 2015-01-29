@@ -7,8 +7,7 @@ import arrow
 
 lastsynctime = None
 
-if platform.node() == 'ebs-34536':
-    # on 98
+if True:
     now = arrow.utcnow().timestamp
     try:
         with open('lastsynctime', 'r+') as f:
@@ -20,14 +19,9 @@ if platform.node() == 'ebs-34536':
             f.write(str(now))
 
 
-home = expanduser("~")
+# upyun_api.sync_folder('C:\\Users\\dell\\Desktop\\images\\res_icon', '/static/images/res_icon')
 upyun_api.sync_folder(
-    join(home, 'fbt_server_py', 'static/images'), '/static/images',
+    '/Users/laike9m/Desktop/images', '/static/images',
     lastsynctime=lastsynctime
 )
-# upyun_api.sync_folder('C:\\Users\\dell\\Desktop\\images\\res_icon', '/static/images/res_icon')
-# upyun_api.sync_folder(
-#     '/Users/laike9m/Desktop/images', '/static/images',
-#     lastsynctime=now
-# )
 # upyun_api.sync_folder('/Users/laike9m/Desktop/images/res_icon', '/static/images/res_icon')
