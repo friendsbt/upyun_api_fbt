@@ -29,7 +29,7 @@ def run_sync(periodic=False):
     )
 
     if periodic:
-        threading.Timer(300, run_sync, True)
+        threading.Timer(300, run_sync, True).start()
 
 
 if __name__ == '__main__':
