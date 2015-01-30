@@ -180,6 +180,7 @@ def sync_folder(local_root_folder, upyun_root_folder, lastsynctime=None):
     取较新的覆盖到另一边
     :return:
     """
+    lastsynctime = int(lastsynctime) if lastsynctime else None
     local_root_folder = os.path.realpath(local_root_folder)
     if not os.path.exists(local_root_folder):
         return NOT_EXIST

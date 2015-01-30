@@ -22,6 +22,6 @@ if True:
 # upyun_api.sync_folder('C:\\Users\\dell\\Desktop\\images\\res_icon', '/static/images/res_icon')
 upyun_api.sync_folder(
     '/Users/laike9m/Desktop/images', '/static/images',
-    lastsynctime=int(lastsynctime)
+    lastsynctime=lastsynctime
 )
 # upyun_api.sync_folder('/Users/laike9m/Desktop/images/res_icon', '/static/images/res_icon')
