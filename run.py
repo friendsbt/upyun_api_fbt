@@ -8,7 +8,7 @@ import upyun_api
 
 home = expanduser("~")
 
-def run_sync(periodic=Flase):
+def run_sync(periodic=False):
     lastsynctime = None
     if platform.node() == 'ebs-34536':
         # on 98
