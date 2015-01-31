@@ -28,7 +28,11 @@ class MultiUpThreadPoolExecutor(ThreadPoolExecutor):
             self.__submit_to = 0
 
     def succeed_callback(self, future):
-        self.fds[future.filepath_local].close()
+        try:
+            self.fds[future.filepath_local].close()
+            del self.fds[future.filepath_local]
+        except KeyError as e:
+            logging.error(e)
         print(future.method + " " + future.filepath_on_upyun + " succeed")
         logging.info(future.method + " " + future.filepath_on_upyun + " succeed")
 
