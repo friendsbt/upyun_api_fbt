@@ -24,7 +24,7 @@ def run_sync(periodic=False):
 
     print("run sync: " + arrow.utcnow().format('YYYY-MM-DD HH:mm:ss ZZ'))
     upyun_api.sync_folder(
-        join(home, 'fbt_server_py', 'static/images'), '/static/images',
+        join(home, 'latest_fbt_server_py', 'static/images'), '/static/images',
         lastsynctime=int(lastsynctime)
     )
 
