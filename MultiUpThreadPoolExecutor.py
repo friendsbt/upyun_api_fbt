@@ -6,7 +6,6 @@ import upyun
 try:
     from config import *
 except ImportError:
-    BUCKETNAME = os.environ['BUCKETNAME']
     UPYUN_USERNAME = os.environ['UPYUN_USERNAME']
     UPYUN_PASSWORD = os.environ['UPYUN_PASSWORD']
 from my_logging import *
@@ -14,10 +13,14 @@ from my_logging import *
 
 class MultiUpThreadPoolExecutor(ThreadPoolExecutor):
 
-    def __init__(self, max_workers):
+    def __init__(self, max_workers, BUCKETNAME=None):
+        self.BUCKETNAME = BUCKETNAME if BUCKETNAME else 'fbt-image'
         self._max_workers = max_workers
-        self.workers = [upyun.UpYun(BUCKETNAME, UPYUN_USERNAME, UPYUN_PASSWORD,
-                        endpoint=upyun.ED_AUTO) for i in range(max_workers)]
+        self.workers = [
+            upyun.UpYun(self.BUCKETNAME, UPYUN_USERNAME, UPYUN_PASSWORD,
+                        endpoint=upyun.ED_AUTO)
+            for _ in range(max_workers)
+        ]
         self.fds = {}
         self.__submit_to = 0
         super(MultiUpThreadPoolExecutor, self).__init__(max_workers)

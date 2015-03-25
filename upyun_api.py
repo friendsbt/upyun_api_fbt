@@ -172,7 +172,8 @@ def check_sync_succeed(local_root_folder, upyun_root_folder):
 
     return True, ''
 
-def sync_folder(local_root_folder, upyun_root_folder, lastsynctime=None):
+def sync_folder(local_root_folder, upyun_root_folder, lastsynctime=None,
+                new_up=None, image_only=True):
     """
     :param local_root_folder: 要同步的本地路径, 绝对路径
     :param upyun_root_folder: 又拍云的存储路径, 绝对路径
@@ -180,6 +181,8 @@ def sync_folder(local_root_folder, upyun_root_folder, lastsynctime=None):
     取较新的覆盖到另一边
     :return:
     """
+    global up
+    up = new_up if new_up is not None else up
     lastsynctime = int(lastsynctime) if lastsynctime else None
     local_root_folder = os.path.realpath(local_root_folder)
     if not os.path.exists(local_root_folder):
@@ -194,8 +197,11 @@ def sync_folder(local_root_folder, upyun_root_folder, lastsynctime=None):
         if os.path.basename(root).startswith('.'):
             continue
         subdirs[:] = [d for d in subdirs if d[0] != '.']
-        files = [f for f in files if not f.startswith('.')
-                 and imghdr.what(join_path(root, f)) is not None]
+        if image_only:
+            files = [f for f in files if not f.startswith('.')
+                     and imghdr.what(join_path(root, f)) is not None]
+        else:
+            files = [f for f in files if not f.startswith('.')]
 
         relpath = os.path.relpath(root, local_root_folder)
         upyun_folder = join_path(upyun_root_folder, relpath)
@@ -203,7 +209,7 @@ def sync_folder(local_root_folder, upyun_root_folder, lastsynctime=None):
             res = up.getlist(upyun_folder)
         except upyun.UpYunServiceException as se:
             # 云端没有这个目录
-            if (se.status == 404):
+            if se.status == 404:
                 for file in files:
                     file_to_upload.append(
                         (join_path(root, file),
@@ -269,11 +275,11 @@ def sync_folder(local_root_folder, upyun_root_folder, lastsynctime=None):
         ]
         print("file_to_upload:", file_to_upload)
 
-    with MultiUpThreadPoolExecutor(max_workers=8) as executor:
+    with MultiUpThreadPoolExecutor(8, up.bucket) as executor:
         for local_remote_tuple in file_to_download:
             executor.submit(*local_remote_tuple)
 
-    with MultiUpThreadPoolExecutor(max_workers=8) as executor:
+    with MultiUpThreadPoolExecutor(8, up.bucket) as executor:
         for local_remote_tuple in file_to_upload:
             executor.submit(*local_remote_tuple, method='PUT')
 

@@ -84,7 +84,7 @@ class TestUpyunFolderAPI(unittest.TestCase):
     def test_check_sync_succeed(self):
         result = upyun_api.check_sync_succeed(
             os.path.join(curpath, self.local_test_folder),
-                                     self.upyun_test_folder)
+            self.upyun_test_folder)
 
         self.assertEqual((True, ''), result)
 
