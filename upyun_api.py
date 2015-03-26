@@ -257,7 +257,9 @@ def sync_folder(local_root_folder, upyun_root_folder, lastsynctime=None,
                     if os.path.getatime(local_file) > upyun_files[f]['time']:
                         file_to_upload.append(local_remote_tuple)
                     else:
-                        file_to_download.append(local_remote_tuple)
+                        # always upload if not equal
+                        file_to_upload.append(local_remote_tuple)
+                        #file_to_download.append(local_remote_tuple)
 
             # download folder if doesn't exist
             for upyun_subdir in upyun_subdirs:
