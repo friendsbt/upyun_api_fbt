@@ -10,7 +10,7 @@ home = expanduser("~")
 
 def run_sync(periodic=False):
     lastsynctime = None
-    if platform.node() == 'ebs-34536':
+    if platform.node() == 'fbt98':
         # on 98
         now = arrow.utcnow().timestamp
         try:
