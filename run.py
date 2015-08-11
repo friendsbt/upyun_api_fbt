@@ -10,7 +10,7 @@ home = expanduser("~")
 
 def run_sync(periodic=False):
     lastsynctime = None
-    if platform.node() == 'fbt98':
+    if platform.node() == 'fbt145':
         # on 98
         now = arrow.utcnow().timestamp
         try:
@@ -21,6 +21,7 @@ def run_sync(periodic=False):
         except IOError:
             with open('lastsynctime', 'w') as f:
                 f.write(str(now))
+                lastsynctime = now
 
     print("run sync: " + arrow.utcnow().format('YYYY-MM-DD HH:mm:ss ZZ'))
     upyun_api.sync_folder(
